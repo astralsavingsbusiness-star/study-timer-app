@@ -80,6 +80,5 @@ server.registerTool(
 const transport = new StreamableHTTPServerTransport();
 
 export default async function handler(req, res) {
-  await server.connect(transport);
-  await transport.handleRequest(req, res);
+await transport.handle(server, req, res);
 }
