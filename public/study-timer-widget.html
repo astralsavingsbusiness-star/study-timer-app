@@ -1,1 +1,440 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Study timer</title>
+    <style>
+      :root {
+        color: #0b0b0f;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        min-height: 100%;
+        box-sizing: border-box;
+        background: transparent;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+      }
+      .card {
+        width: 100%;
+        max-width: 480px;
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+        padding: 16px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .header-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .header-label {
+        font-size: 11px;
+        font-weight: 500;
+        color: #6b7280;
+      }
+      .header-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+      }
+      .header-pill {
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        padding: 4px 10px;
+        font-size: 11px;
+        color: #6b7280;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .header-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: #10a37f;
+      }
 
+      .mode-toggle {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        background: #f3f4f6;
+        padding: 3px;
+        gap: 2px;
+      }
+      .mode-button {
+        flex: 1;
+        min-width: 70px;
+        border-radius: 999px;
+        border: none;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 500;
+        background: transparent;
+        color: #6b7280;
+        cursor: pointer;
+        transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+      }
+      .mode-button[data-active="true"] {
+        background: #ffffff;
+        color: #111827;
+        box-shadow: 0 1px 3px rgba(17, 24, 39, 0.12);
+      }
+
+      .time-display {
+        font-size: 42px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        color: #111827;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .progress {
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: #f3f4f6;
+        overflow: hidden;
+      }
+      .progress-inner {
+        height: 100%;
+        width: 0%;
+        background: #10a37f;
+        transition: width 200ms ease-out;
+      }
+
+      .presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .preset-button {
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+        transition: background 120ms ease, border-color 120ms ease;
+      }
+      .preset-button:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+      }
+
+      .inputs-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .field-label {
+        font-size: 11px;
+        font-weight: 500;
+        color: #6b7280;
+      }
+      .field-input {
+        width: 80px;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        padding: 5px 8px;
+        font-size: 13px;
+        color: #111827;
+        outline: none;
+      }
+      .field-input:focus {
+        border-color: #10a37f;
+        background: #ffffff;
+      }
+
+      .set-time-button {
+        margin-top: 18px;
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        padding: 6px 11px;
+        font-size: 11px;
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+      }
+      .set-time-button:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+      }
+
+      .footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .primary-button {
+        border-radius: 999px;
+        border: none;
+        padding: 7px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #ffffff;
+        background: #10a37f;
+        cursor: pointer;
+        box-shadow: 0 6px 16px rgba(16, 163, 127, 0.35);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 120ms ease;
+      }
+      .primary-button:not([disabled]):hover {
+        opacity: 0.94;
+      }
+
+      .secondary-button {
+        border-radius: 999px;
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        padding: 7px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+      }
+      .secondary-button:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+      }
+
+      @media (max-width: 480px) {
+        .card {
+          padding: 14px;
+        }
+        .time-display {
+          font-size: 36px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="header">
+        <div class="header-text">
+          <div class="header-label">Study tools</div>
+          <div class="header-title">Timer and stopwatch</div>
+        </div>
+        <div class="header-pill">
+          <span class="header-dot"></span>
+          Focus session
+        </div>
+      </div>
+
+      <div class="mode-toggle">
+        <button id="mode-timer" class="mode-button" data-active="true">Timer</button>
+        <button id="mode-stopwatch" class="mode-button">Stopwatch</button>
+      </div>
+
+      <div id="time-display" class="time-display">00:00</div>
+
+      <div id="progress" class="progress">
+        <div id="progress-inner" class="progress-inner"></div>
+      </div>
+
+      <div id="presets" class="presets"></div>
+
+      <div class="inputs-row">
+        <div class="field">
+          <label class="field-label" for="minutes-input">Minutes</label>
+          <input id="minutes-input" class="field-input" type="number" min="0" max="999" value="25"/>
+        </div>
+        <div class="field">
+          <label class="field-label" for="seconds-input">Seconds</label>
+          <input id="seconds-input" class="field-input" type="number" min="0" max="59" value="0"/>
+        </div>
+        <button id="set-time-button" class="set-time-button">Set time</button>
+      </div>
+
+      <div class="footer">
+        <div class="controls">
+          <button id="start-pause-button" class="primary-button">Start</button>
+          <button id="reset-button" class="secondary-button">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let mode = "timer";
+      let totalMs = 25 * 60000;
+      let currentMs = totalMs;
+      let running = false;
+      let intervalId = null;
+
+      const modeTimerBtn = document.getElementById("mode-timer");
+      const modeStopwatchBtn = document.getElementById("mode-stopwatch");
+      const timeDisplayEl = document.getElementById("time-display");
+      const progressEl = document.getElementById("progress");
+      const progressInnerEl = document.getElementById("progress-inner");
+      const presetsEl = document.getElementById("presets");
+      const minutesInput = document.getElementById("minutes-input");
+      const secondsInput = document.getElementById("seconds-input");
+      const setTimeButton = document.getElementById("set-time-button");
+      const startPauseButton = document.getElementById("start-pause-button");
+      const resetButton = document.getElementById("reset-button");
+
+      function readInitialConfig() {
+        const output = window.openai?.toolOutput;
+        if (!output) return;
+        if (output.mode === "stopwatch") mode = "stopwatch";
+        if (typeof output.durationSeconds === "number") totalMs = output.durationSeconds * 1000;
+        if (mode === "timer") currentMs = totalMs;
+        else currentMs = 0;
+      }
+
+      function updateDisplay() {
+        const sec = Math.max(0, Math.floor(currentMs / 1000));
+        const m = String(Math.floor(sec / 60)).padStart(2, "0");
+        const s = String(sec % 60).padStart(2, "0");
+        timeDisplayEl.textContent = m + ":" + s;
+
+        if (mode === "timer") {
+          progressEl.style.display = "block";
+          const p = 1 - currentMs / totalMs;
+          progressInnerEl.style.width = String(Math.max(0, p) * 100) + "%";
+        } else {
+          progressEl.style.display = "none";
+        }
+
+        startPauseButton.textContent = running ? "Pause" : "Start";
+      }
+
+      function clearTick() {
+        if (intervalId) clearInterval(intervalId);
+        intervalId = null;
+      }
+
+      function startTick() {
+        if (running) return;
+        running = true;
+        intervalId = setInterval(() => {
+          if (mode === "timer") {
+            currentMs -= 1000;
+            if (currentMs <= 0) {
+              currentMs = 0;
+              running = false;
+              clearTick();
+            }
+          } else {
+            currentMs += 1000;
+          }
+          updateDisplay();
+        }, 1000);
+        updateDisplay();
+      }
+
+      function pauseTick() {
+        running = false;
+        clearTick();
+        updateDisplay();
+      }
+
+      function handleStartPause() {
+        if (running) pauseTick();
+        else startTick();
+      }
+
+      function handleReset() {
+        running = false;
+        clearTick();
+        if (mode === "timer") currentMs = totalMs;
+        else currentMs = 0;
+        updateDisplay();
+      }
+
+      function applyCustomTime() {
+        const minutes = Number(minutesInput.value) || 0;
+        let seconds = Number(secondsInput.value) || 0;
+        if (seconds < 0) seconds = 0;
+        if (seconds > 59) seconds = 59;
+        const total = minutes * 60 + seconds;
+        totalMs = total * 1000;
+        if (mode === "timer") currentMs = totalMs;
+        else currentMs = 0;
+        updateDisplay();
+      }
+
+      setTimeButton.addEventListener("click", applyCustomTime);
+
+      modeTimerBtn.addEventListener("click", () => {
+        mode = "timer";
+        running = false;
+        clearTick();
+        currentMs = totalMs;
+        modeTimerBtn.dataset.active = "true";
+        modeStopwatchBtn.dataset.active = "false";
+        updateDisplay();
+      });
+
+      modeStopwatchBtn.addEventListener("click", () => {
+        mode = "stopwatch";
+        running = false;
+        clearTick();
+        currentMs = 0;
+        modeTimerBtn.dataset.active = "false";
+        modeStopwatchBtn.dataset.active = "true";
+        updateDisplay();
+      });
+
+      startPauseButton.addEventListener("click", handleStartPause);
+      resetButton.addEventListener("click", handleReset);
+
+      function renderPresets() {
+        presetsEl.innerHTML = "";
+        [5, 10, 25, 45].forEach((m) => {
+          const b = document.createElement("button");
+          b.className = "preset-button";
+          b.textContent = m + " min";
+          b.onclick = () => {
+            minutesInput.value = String(m);
+            secondsInput.value = "0";
+            applyCustomTime();
+          };
+          presetsEl.appendChild(b);
+        });
+      }
+
+      renderPresets();
+      readInitialConfig();
+      updateDisplay();
+    </script>
+  </body>
+</html>
